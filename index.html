@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roots COFFEE & CRAFT – Order Menu</title>
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/client.css">
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="client-header">
+  <a href="#" class="logo">
+    <span class="logo-roots">Roots</span>
+    <span class="logo-sub">Coffee & Craft</span>
+  </a>
+  <button class="cart-btn" id="openCartBtn" aria-label="View cart">
+    <i class="fa-solid fa-basket-shopping"></i>
+    <span class="cart-count" id="cartCount">0</span>
+  </button>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="client-hero">
+  <a href="#" class="logo">
+    <span class="logo-roots">Roots</span>
+    <span class="logo-sub">Coffee &amp; Craft</span>
+  </a>
+  <p>Scan. Browse. Order. Enjoy ☕</p>
+</section>
+
+<!-- ===== CATEGORY TABS ===== -->
+<nav class="category-bar" id="categoryBar">
+  <button class="cat-tab active" data-cat="All">All</button>
+  <button class="cat-tab" data-cat="Appetizer">Appetizer</button>
+  <button class="cat-tab" data-cat="Main Course">Main Course</button>
+  <button class="cat-tab" data-cat="Drinks">Drinks</button>
+  <button class="cat-tab" data-cat="Dessert">Dessert</button>
+  <button class="cat-tab" data-cat="Specialty">Specialty</button>
+</nav>
+
+<!-- ===== PRODUCTS ===== -->
+<section class="products-section">
+  <h2 id="categoryTitle">All Items</h2>
+  <div class="product-grid" id="productGrid">
+    <div class="spinner-center"><div class="spinner"></div></div>
+  </div>
+</section>
+
+<!-- ===== CART OVERLAY ===== -->
+<div class="cart-overlay" id="cartOverlay"></div>
+
+<!-- ===== CART SIDEBAR ===== -->
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3><i class="fa-solid fa-basket-shopping"></i> Your Order</h3>
+    <button class="cart-close" id="closeCartBtn">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsEl">
+    <div class="cart-empty"><i class="fa-solid fa-mug-hot"></i><p>Your cart is empty</p></div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span>Total</span>
+      <span id="cartTotalEl">₱0.00</span>
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" id="checkoutBtn" disabled>
+      <i class="fa-solid fa-clipboard-check"></i> Proceed to Checkout
+    </button>
+  </div>
+</aside>
+
+<!-- ===== CHECKOUT MODAL ===== -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-clipboard-list"></i> Confirm Your Order</h3>
+      <button class="modal-close" id="closeCheckoutBtn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="customerName">Your Name</label>
+        <input type="text" id="customerName" class="form-control" placeholder="Enter your name" maxlength="80">
+      </div>
+      <p class="text-muted mb-2">Order Summary:</p>
+      <ul class="order-summary-list" id="summaryList"></ul>
+      <div class="summary-total">
+        <span>Total Amount</span>
+        <span id="summaryTotal">₱0.00</span>
+      </div>
+      <p class="text-muted mt-2" style="font-size:.8rem">Payment will be collected at the counter.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="backToCartBtn">Back</button>
+      <button class="btn btn-primary" id="placeOrderBtn">
+        <i class="fa-solid fa-paper-plane"></i> Place Order
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ORDER CONFIRMATION ===== -->
+<div class="confirmation-screen" id="confirmationScreen">
+  <div class="confirm-icon">✅</div>
+  <h1 class="confirm-title">Order Placed!</h1>
+  <p class="confirm-id" id="confirmOrderId">Order #0000</p>
+  <p class="confirm-msg">Your order is being prepared. Please wait for your name to be called at the counter.</p>
+  <button class="btn btn-primary btn-lg" id="newOrderBtn">
+    <i class="fa-solid fa-rotate-left"></i> Order Again
+  </button>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+
+<script src="js/client.js"></script>
+</body>
+</html>

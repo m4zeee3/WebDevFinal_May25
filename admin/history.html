@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order History – Roots Admin</title>
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="dashboard.html" class="logo"><span class="logo-roots">Roots</span><span class="logo-sub">Coffee &amp; Craft</span></a>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Main</span>
+      <a href="dashboard.html"  class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="orders.html"     class="nav-link"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <span class="nav-section-label">Catalog</span>
+      <a href="products.html"   class="nav-link"><i class="fa-solid fa-mug-hot"></i> Products</a>
+      <a href="inventory.html"  class="nav-link"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
+      <span class="nav-section-label">Records</span>
+      <a href="history.html"    class="nav-link active"><i class="fa-solid fa-clock-rotate-left"></i> Order History</a>
+      <a href="reports.html"    class="nav-link"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+      <a href="analytics.html"  class="nav-link"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user"><i class="fa-solid fa-circle-user"></i><div><span id="userName">—</span><strong id="userRole" style="font-size:.7rem;color:var(--brown-light)"></strong></div></div>
+      <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="d-flex align-center">
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+        <h1><i class="fa-solid fa-clock-rotate-left" style="color:var(--brown-light)"></i> Order History</h1>
+      </div>
+      <span class="topbar-meta" id="resultCount"></span>
+    </header>
+
+    <main class="page-content">
+
+      <div class="filters-bar">
+        <input type="text" id="searchH" placeholder="Search by ID or customer…" style="flex:1;max-width:240px">
+        <input type="date" id="histFrom">
+        <input type="date" id="histTo">
+        <select id="histStatus">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="preparing">Preparing</option>
+          <option value="ready">Ready</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="loadHistory()"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        <button class="btn btn-secondary btn-sm" onclick="clearH()">Clear</button>
+      </div>
+
+      <div class="card" style="padding:0">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Customer</th><th>Type</th><th>Total</th><th>Status</th><th>Employee</th><th>Date & Time</th></tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr><td colspan="7" class="text-center text-muted" style="padding:40px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="../js/admin-history.js"></script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – Roots Admin</title>
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+<div class="admin-wrapper">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="dashboard.html" class="logo">
+        <span class="logo-roots">Roots</span>
+        <span class="logo-sub">Coffee &amp; Craft</span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Main</span>
+      <a href="dashboard.html"  class="nav-link active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="orders.html"     class="nav-link"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <span class="nav-section-label">Catalog</span>
+      <a href="products.html"   class="nav-link"><i class="fa-solid fa-mug-hot"></i> Products</a>
+      <a href="inventory.html"  class="nav-link"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
+      <span class="nav-section-label">Records</span>
+      <a href="history.html"    class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Order History</a>
+      <a href="reports.html"    class="nav-link"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+      <a href="analytics.html"  class="nav-link"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <i class="fa-solid fa-circle-user"></i>
+        <div><span id="userName">—</span><strong id="userRole" style="font-size:.7rem;color:var(--brown-light)"></strong></div>
+      </div>
+      <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="d-flex align-center">
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+        <h1><i class="fa-solid fa-gauge-high" style="color:var(--brown-light)"></i> Dashboard</h1>
+      </div>
+      <span class="topbar-meta" id="topbarDate"></span>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fa-solid fa-receipt"></i></div>
+          <div><div class="stat-label">Orders Today</div><div class="stat-value" id="statTodayOrders">—</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon brown"><i class="fa-solid fa-peso-sign"></i></div>
+          <div><div class="stat-label">Sales Today</div><div class="stat-value" id="statTodaySales">—</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fa-solid fa-hourglass-half"></i></div>
+          <div><div class="stat-label">Pending Orders</div><div class="stat-value" id="statPending">—</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-mug-hot"></i></div>
+          <div><div class="stat-label">Total Products</div><div class="stat-value" id="statProducts">—</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-sack-dollar"></i></div>
+          <div><div class="stat-label">All-Time Sales</div><div class="stat-value" id="statTotalSales">—</div></div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card chart-card-full">
+          <h3><i class="fa-solid fa-chart-area" style="color:var(--brown-light)"></i> Sales – Last 7 Days</h3>
+          <canvas id="salesChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3><i class="fa-solid fa-trophy" style="color:var(--brown-light)"></i> Top Products</h3>
+          <canvas id="topProductsChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3><i class="fa-solid fa-chart-pie" style="color:var(--brown-light)"></i> Order Status</h3>
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Orders -->
+      <div class="card">
+        <div class="page-header" style="margin-bottom:14px">
+          <h3 style="font-size:1rem;color:var(--brown-dark)"><i class="fa-solid fa-list-check"></i> Recent Orders</h3>
+          <a href="orders.html" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div class="table-wrap">
+          <table id="recentTable">
+            <thead>
+              <tr><th>#</th><th>Customer</th><th>Type</th><th>Total</th><th>Status</th><th>Time</th></tr>
+            </thead>
+            <tbody id="recentBody">
+              <tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/admin-dashboard.js"></script>
+</body>
+</html>

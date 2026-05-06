@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory – Roots Admin</title>
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="dashboard.html" class="logo"><span class="logo-roots">Roots</span><span class="logo-sub">Coffee &amp; Craft</span></a>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Main</span>
+      <a href="dashboard.html"  class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="orders.html"     class="nav-link"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <span class="nav-section-label">Catalog</span>
+      <a href="products.html"   class="nav-link"><i class="fa-solid fa-mug-hot"></i> Products</a>
+      <a href="inventory.html"  class="nav-link active"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
+      <span class="nav-section-label">Records</span>
+      <a href="history.html"    class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Order History</a>
+      <a href="reports.html"    class="nav-link"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+      <a href="analytics.html"  class="nav-link"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user"><i class="fa-solid fa-circle-user"></i><div><span id="userName">—</span><strong id="userRole" style="font-size:.7rem;color:var(--brown-light)"></strong></div></div>
+      <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="d-flex align-center">
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+        <h1><i class="fa-solid fa-boxes-stacked" style="color:var(--brown-light)"></i> Inventory</h1>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer">
+        <input type="checkbox" id="showLowOnly" onchange="loadInventory()"> Show Low Stock Only
+      </label>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Summary Cards -->
+      <div class="stats-grid" style="margin-bottom:20px" id="invSummary"></div>
+
+      <!-- Low stock alert -->
+      <div id="lowAlert" style="display:none;background:#fff3cd;border-left:4px solid #ffc107;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.875rem;color:#856404">
+        <i class="fa-solid fa-triangle-exclamation"></i> <strong>Low Stock Alert:</strong> Some products are running low. Please restock soon.
+      </div>
+
+      <div class="card" style="padding:0">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Product</th><th>Category</th><th>Current Stock</th><th>Level</th><th>Update Stock</th></tr>
+            </thead>
+            <tbody id="invBody">
+              <tr><td colspan="5" class="text-center text-muted" style="padding:40px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="../js/admin-inventory.js"></script>
+</body>
+</html>

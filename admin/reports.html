@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports – Roots Admin</title>
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="dashboard.html" class="logo"><span class="logo-roots">Roots</span><span class="logo-sub">Coffee &amp; Craft</span></a>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Main</span>
+      <a href="dashboard.html"  class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="orders.html"     class="nav-link"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <span class="nav-section-label">Catalog</span>
+      <a href="products.html"   class="nav-link"><i class="fa-solid fa-mug-hot"></i> Products</a>
+      <a href="inventory.html"  class="nav-link"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
+      <span class="nav-section-label">Records</span>
+      <a href="history.html"    class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Order History</a>
+      <a href="reports.html"    class="nav-link active"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+      <a href="analytics.html"  class="nav-link"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user"><i class="fa-solid fa-circle-user"></i><div><span id="userName">—</span><strong id="userRole" style="font-size:.7rem;color:var(--brown-light)"></strong></div></div>
+      <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="d-flex align-center">
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+        <h1><i class="fa-solid fa-chart-simple" style="color:var(--brown-light)"></i> Reports</h1>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="exportCSV()">
+        <i class="fa-solid fa-file-csv"></i> Export CSV
+      </button>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Controls -->
+      <div class="filters-bar">
+        <label style="font-size:.85rem;font-weight:600;color:var(--brown-mid)">Period:</label>
+        <select id="reportPeriod">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+        <input type="date" id="reportFrom">
+        <input type="date" id="reportTo">
+        <button class="btn btn-primary btn-sm" onclick="loadReports()"><i class="fa-solid fa-magnifying-glass"></i> Generate</button>
+      </div>
+
+      <!-- Sales Summary -->
+      <div class="card mb-2">
+        <div class="page-header" style="margin-bottom:14px">
+          <h3 style="font-size:1rem;color:var(--brown-dark)"><i class="fa-solid fa-peso-sign"></i> Sales Summary</h3>
+          <span id="salesSummaryMeta" class="text-muted"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Period</th><th>Orders</th><th>Revenue</th></tr></thead>
+            <tbody id="salesBody"><tr><td colspan="3" class="text-center text-muted">Click Generate to load</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Two-column: Products + Categories -->
+      <div class="charts-grid">
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--brown-dark);margin-bottom:12px"><i class="fa-solid fa-ranking-star"></i> Top Products</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Product</th><th>Category</th><th>Sold</th><th>Revenue</th></tr></thead>
+              <tbody id="rankBody"><tr><td colspan="4" class="text-center text-muted">—</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--brown-dark);margin-bottom:12px"><i class="fa-solid fa-layer-group"></i> Category Performance</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Category</th><th>Orders</th><th>Units</th><th>Revenue</th></tr></thead>
+              <tbody id="catBody"><tr><td colspan="4" class="text-center text-muted">—</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="../js/admin-reports.js"></script>
+</body>
+</html>

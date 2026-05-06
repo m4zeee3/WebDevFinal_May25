@@ -1,0 +1,240 @@
+/* =============================================
+   Roots – Cashier POS
+   ============================================= */
+
+html, body { height: 100%; overflow: hidden; }
+body.cashier-body { background: #f4f1ec; }
+
+/* ----- Top Nav ----- */
+.cashier-nav {
+  height: 56px;
+  background: var(--brown-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+.cashier-nav .logo-roots { color: var(--cream); font-size: 1.6rem; }
+.cashier-nav .logo-sub   { color: rgba(255,235,193,.75); }
+.cashier-nav-right { display: flex; align-items: center; gap: 12px; color: rgba(255,235,193,.8); font-size: 0.8rem; }
+
+/* ----- POS Layout ----- */
+.pos-wrapper {
+  height: calc(100vh - 56px);
+  display: grid;
+  grid-template-columns: 1fr 360px;
+}
+
+/* ----- Left: Menu Panel ----- */
+.menu-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 2px solid var(--border);
+}
+
+.menu-top {
+  padding: 14px 16px 10px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.menu-search {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  margin-bottom: 10px;
+}
+.menu-search:focus { outline: none; border-color: var(--brown-mid); }
+
+.pos-cat-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.pos-cat-tabs::-webkit-scrollbar { display: none; }
+.pos-cat-tab {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+.pos-cat-tab:hover, .pos-cat-tab.active {
+  background: var(--brown-dark);
+  color: var(--white);
+  border-color: var(--brown-dark);
+}
+
+.menu-grid-wrap { flex: 1; overflow-y: auto; padding: 14px 16px; }
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.menu-item {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid transparent;
+}
+.menu-item:hover { border-color: var(--brown-light); transform: translateY(-2px); box-shadow: var(--shadow); }
+.menu-item.out-of-stock { opacity: .5; cursor: not-allowed; pointer-events: none; }
+
+.menu-item-img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  background: var(--cream);
+}
+.menu-item-placeholder {
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: linear-gradient(135deg, var(--cream), var(--brown-light));
+}
+.menu-item-info { padding: 8px 10px; }
+.menu-item-name { font-size: 0.8rem; font-weight: 600; line-height: 1.2; margin-bottom: 3px; }
+.menu-item-price { font-size: 0.9rem; font-weight: 700; color: var(--brown-dark); }
+.menu-item-stock { font-size: 0.68rem; color: var(--text-muted); }
+
+/* ----- Right: Cart Panel ----- */
+.cart-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  overflow: hidden;
+}
+
+.cart-panel-header {
+  padding: 16px 18px 12px;
+  background: var(--brown-dark);
+  color: var(--white);
+}
+.cart-panel-header h3 { font-size: 1rem; font-weight: 700; }
+.cart-panel-header small { font-size: 0.75rem; opacity: .7; }
+
+.pos-cart-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 16px;
+}
+
+.pos-cart-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.pos-cart-item:last-child { border-bottom: none; }
+.pos-item-name { flex: 1; font-size: 0.85rem; font-weight: 600; }
+.pos-item-price { font-size: 0.85rem; color: var(--brown-mid); font-weight: 600; min-width: 70px; text-align: right; }
+.pos-item-unit  { font-size: 0.7rem; color: var(--text-muted); }
+
+.pos-qty-btns { display: flex; align-items: center; gap: 5px; }
+.pos-qty-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--brown-light);
+  background: var(--cream);
+  color: var(--brown-dark);
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+.pos-qty-btn:hover { background: var(--brown-dark); color: var(--white); border-color: var(--brown-dark); }
+.pos-qty-val { font-weight: 700; min-width: 20px; text-align: center; font-size: 0.875rem; }
+
+.pos-cart-empty { text-align: center; padding: 40px 16px; color: var(--text-muted); }
+.pos-cart-empty i { font-size: 2.5rem; display: block; margin-bottom: 10px; opacity: .35; }
+
+/* ----- Totals & Checkout ----- */
+.cart-totals {
+  padding: 14px 18px;
+  background: var(--cream-light);
+  border-top: 2px solid var(--border);
+}
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  padding: 4px 0;
+  color: var(--text-muted);
+}
+.totals-row.grand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--brown-dark);
+  border-top: 2px solid var(--brown-light);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.cash-section {
+  padding: 14px 18px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+}
+.cash-section label { font-size: 0.8rem; font-weight: 600; color: var(--brown-mid); display: block; margin-bottom: 6px; }
+.cash-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--brown-light);
+  border-radius: var(--radius-sm);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brown-dark);
+  text-align: right;
+  margin-bottom: 8px;
+}
+.cash-input:focus { outline: none; border-color: var(--brown-dark); }
+.change-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--success);
+  min-height: 24px;
+}
+.change-error { color: var(--danger); }
+
+.checkout-actions {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* ----- Receipt Modal ----- */
+.receipt {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--black);
+  line-height: 1.5;
+}
+.receipt-header { text-align: center; border-bottom: 1px dashed #999; padding-bottom: 10px; margin-bottom: 12px; }
+.receipt-logo { font-size: 1.3rem; font-weight: 700; font-family: 'Dancing Script', cursive; }
+.receipt-divider { border: none; border-top: 1px dashed #999; margin: 10px 0; }
+.receipt-row { display: flex; justify-content: space-between; }
+.receipt-row.total { font-weight: 700; font-size: 1rem; border-top: 1px solid #999; padding-top: 6px; margin-top: 4px; }
+.receipt-footer { text-align: center; margin-top: 12px; font-size: 0.75rem; color: #555; }
+
+@media (max-width: 768px) {
+  .pos-wrapper { grid-template-columns: 1fr; }
+  .cart-panel  { position: fixed; bottom: 0; left: 0; right: 0; height: 50vh; border-top: 2px solid var(--border); z-index: 50; }
+  .menu-panel  { height: calc(100vh - 56px - 50vh); }
+}

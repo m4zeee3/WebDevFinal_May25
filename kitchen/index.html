@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen Display – Roots</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Dancing+Script:wght@700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/kitchen.css">
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="kitchen-header">
+  <a href="#" class="logo">
+    <span class="logo-roots">Roots</span>
+    <span class="logo-sub">Coffee &amp; Craft</span>
+  </a>
+  <div class="kitchen-clock" id="kitchenClock">00:00:00</div>
+  <div class="kitchen-status">
+    <div class="pulse-dot" id="pulseIndicator"></div>
+    <span id="statusLabel">Connecting…</span>
+    <span id="orderCount" style="font-weight:700;color:#FFEBC1;margin-left:8px"></span>
+  </div>
+</header>
+
+<!-- ===== NEW ORDER BANNER ===== -->
+<div class="new-order-banner" id="newOrderBanner">
+  <i class="fa-solid fa-bell"></i> New Order Received!
+</div>
+
+<!-- ===== ORDERS AREA ===== -->
+<main class="kitchen-body">
+  <div id="kitchenContent">
+    <div style="display:flex;justify-content:center;padding:60px 0">
+      <div style="width:40px;height:40px;border:4px solid rgba(255,235,193,.3);border-top-color:#D7A86E;border-radius:50%;animation:spin .8s linear infinite"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== REFRESH PROGRESS BAR ===== -->
+<div class="refresh-bar">
+  <div class="refresh-progress" id="refreshProgress"></div>
+</div>
+
+<script src="../js/kitchen.js"></script>
+</body>
+</html>

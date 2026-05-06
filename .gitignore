@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Uploaded product images (user-generated)
+images/uploads/*
+!images/uploads/.gitkeep
+
+# PHP session files
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
