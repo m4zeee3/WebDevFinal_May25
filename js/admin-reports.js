@@ -112,9 +112,17 @@ function exportCSV() {
   window.location.href = `${ADMIN_API}/reports.php?action=export_csv&date_from=${from}&date_to=${to}`;
 }
 
-async function logout() {
-  await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
-  window.location.href = 'login.html';
+function logout() {
+  showConfirm({
+    title: 'Log Out',
+    message: 'Are you sure you want to log out?',
+    confirmLabel: 'Log Out',
+    type: 'logout',
+    onConfirm: async () => {
+      await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
+      window.location.href = 'login.html';
+    },
+  });
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

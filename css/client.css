@@ -194,7 +194,21 @@
   transition: var(--transition);
 }
 .qty-btn:hover { background: var(--brown-light); color: var(--white); border-color: var(--brown-light); }
-.qty-val { font-weight: 700; min-width: 22px; text-align: center; font-size: 0.9rem; }
+.qty-val {
+  font-weight: 700;
+  width: 46px;
+  text-align: center;
+  font-size: 0.9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 4px;
+  background: var(--cream-light);
+  color: var(--brown-dark);
+  -moz-appearance: textfield;
+}
+.qty-val::-webkit-outer-spin-button,
+.qty-val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty-val:focus { outline: none; border-color: var(--brown-dark); background: #fff; }
 .qty-remove { color: var(--danger); font-size: 0.75rem; margin-left: 4px; background: none; border: none; }
 
 .cart-footer { padding: 16px 20px; border-top: 2px solid var(--border); background: var(--cream-light); }

@@ -10,6 +10,9 @@ images/uploads/*
 # PHP session files
 /tmp/
 
+# Node
+node_modules/
+
 # IDE
 .vscode/
 .idea/

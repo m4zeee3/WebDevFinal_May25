@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Codes – Roots Admin</title>
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    .qr-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .qr-controls .form-group { margin: 0; flex: 1; min-width: 200px; }
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .qr-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .qr-card .table-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--brown-dark);
+    }
+    .qr-card .qr-url {
+      font-size: .65rem;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+    .qr-card canvas, .qr-card img { border-radius: 6px; }
+    .qr-card .btn { width: 100%; }
+
+    @media print {
+      .topbar, .sidebar, .sidebar-overlay, .qr-controls, .btn, #sidebarToggle { display: none !important; }
+      .main-content { margin: 0 !important; padding: 0 !important; }
+      .qr-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .qr-card { border: 1px solid #ccc; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="dashboard.html" class="logo">
+        <span class="logo-roots">Roots</span>
+        <span class="logo-sub">Coffee &amp; Craft</span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Main</span>
+      <a href="dashboard.html"  class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="orders.html"     class="nav-link"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <a href="qrcodes.html"    class="nav-link active"><i class="fa-solid fa-qrcode"></i> QR Codes</a>
+      <span class="nav-section-label">Catalog</span>
+      <a href="products.html"   class="nav-link"><i class="fa-solid fa-mug-hot"></i> Products</a>
+      <a href="inventory.html"  class="nav-link"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
+      <span class="nav-section-label">Records</span>
+      <a href="history.html"    class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Order History</a>
+      <a href="reports.html"    class="nav-link"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+      <a href="analytics.html"  class="nav-link"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <i class="fa-solid fa-circle-user"></i>
+        <div><span id="userName">—</span><strong id="userRole" style="font-size:.7rem;color:var(--brown-light)"></strong></div>
+      </div>
+      <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="d-flex align-center">
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+        <h1><i class="fa-solid fa-qrcode" style="color:var(--brown-light)"></i> Table QR Codes</h1>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> Print All
+      </button>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Controls -->
+      <div class="qr-controls">
+        <div class="form-group">
+          <label>Base URL <span class="text-muted" style="font-size:.75rem">(the address of your site)</span></label>
+          <input type="text" id="baseUrl" class="form-control" value="http://localhost:8000" placeholder="http://localhost:8000">
+        </div>
+        <div class="form-group" style="max-width:140px">
+          <label>Number of Tables</label>
+          <input type="number" id="tableCount" class="form-control" value="10" min="1" max="50">
+        </div>
+        <button class="btn btn-primary" onclick="generateAll()" style="white-space:nowrap">
+          <i class="fa-solid fa-rotate"></i> Generate
+        </button>
+      </div>
+
+      <!-- QR Grid -->
+      <div class="qr-grid" id="qrGrid"></div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="../js/confirm.js"></script>
+<script>
+const ADMIN_API = '../api';
+
+async function checkAuth() {
+  try {
+    const res  = await fetch(`${ADMIN_API}/auth.php?action=check`);
+    const data = await res.json();
+    if (!data.logged_in || data.role !== 'admin') { window.location.href = 'login.html'; return; }
+    document.getElementById('userName').textContent = data.name;
+    document.getElementById('userRole').textContent = data.role.toUpperCase();
+  } catch { window.location.href = 'login.html'; }
+}
+
+function generateAll() {
+  const baseUrl    = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+  const tableCount = parseInt(document.getElementById('tableCount').value);
+
+  if (!baseUrl) { showToast('Please enter a base URL', 'error'); return; }
+  if (isNaN(tableCount) || tableCount < 1 || tableCount > 50) {
+    showToast('Table count must be between 1 and 50', 'error'); return;
+  }
+
+  const grid = document.getElementById('qrGrid');
+  grid.innerHTML = '';
+
+  for (let t = 1; t <= tableCount; t++) {
+    const tableUrl = `${baseUrl}/?table=${t}`;
+
+    const card = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = `
+      <div class="table-label"><i class="fa-solid fa-chair"></i> Table ${t}</div>
+      <div id="qr_${t}"></div>
+      <div class="qr-url">${tableUrl}</div>
+      <button class="btn btn-secondary btn-sm" onclick="downloadQR(${t}, '${tableUrl}')">
+        <i class="fa-solid fa-download"></i> Download
+      </button>`;
+    grid.appendChild(card);
+
+    new QRCode(document.getElementById(`qr_${t}`), {
+      text:   tableUrl,
+      width:  160,
+      height: 160,
+      colorDark:  '#8E3200',
+      colorLight: '#ffffff',
+    });
+  }
+
+  showToast(`Generated ${tableCount} QR codes`, 'success');
+}
+
+function downloadQR(tableNum, tableUrl) {
+  const container = document.getElementById(`qr_${tableNum}`);
+  const canvas    = container.querySelector('canvas');
+  if (!canvas) { showToast('QR not ready yet', 'error'); return; }
+
+  const link    = document.createElement('a');
+  link.download = `table_${tableNum}_qr.png`;
+  link.href     = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function logout() {
+  showConfirm({
+    title: 'Log Out',
+    message: 'Are you sure you want to log out?',
+    confirmLabel: 'Log Out',
+    type: 'logout',
+    onConfirm: async () => {
+      await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
+      window.location.href = 'login.html';
+    },
+  });
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3000);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkAuth();
+  generateAll();
+
+  document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+  });
+  document.getElementById('sidebarOverlay')?.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  });
+});
+</script>
+</body>
+</html>

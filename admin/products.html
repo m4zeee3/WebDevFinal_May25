@@ -18,6 +18,7 @@
       <span class="nav-section-label">Main</span>
       <a href="dashboard.html"  class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
       <a href="orders.html"     class="nav-link"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <a href="qrcodes.html"    class="nav-link"><i class="fa-solid fa-qrcode"></i> QR Codes</a>
       <span class="nav-section-label">Catalog</span>
       <a href="products.html"   class="nav-link active"><i class="fa-solid fa-mug-hot"></i> Products</a>
       <a href="inventory.html"  class="nav-link"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
@@ -79,20 +80,54 @@
 
 <!-- Add/Edit Product Modal -->
 <div class="modal-overlay" id="productModal">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:620px">
     <div class="modal-header">
       <h3 id="modalTitle">Add Product</h3>
       <button class="modal-close" onclick="closeProductModal()">✕</button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:18px">
       <input type="hidden" id="editID">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Product Name <span style="color:red">*</span></label>
+
+      <!-- Image Upload Area -->
+      <div>
+        <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);letter-spacing:.04em;text-transform:uppercase">Product Image</label>
+        <div id="imgDropZone" style="margin-top:8px;border:2px dashed var(--border);border-radius:12px;
+          background:var(--cream);cursor:pointer;overflow:hidden;position:relative;height:180px;
+          display:flex;align-items:center;justify-content:center;transition:border-color .2s">
+          <div id="imgPlaceholder" style="text-align:center;pointer-events:none">
+            <div style="font-size:2.5rem;margin-bottom:8px">☕</div>
+            <div style="font-size:.82rem;color:var(--text-muted);font-weight:500">Click to upload or drag & drop</div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">JPG, PNG, WEBP up to 5MB</div>
+          </div>
+          <img id="imgPreviewEl" src="" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:10px">
+          <div id="imgUploadingBadge" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.45);
+            align-items:center;justify-content:center;border-radius:10px;color:#fff;font-weight:600;font-size:.85rem">
+            <div class="spinner" style="width:22px;height:22px;border-width:3px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
+            &nbsp; Uploading…
+          </div>
+          <button id="imgRemoveBtn" onclick="removeImage(event)" title="Remove image"
+            style="display:none;position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);border:none;
+            color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:.85rem;
+            align-items:center;justify-content:center">✕</button>
+        </div>
+        <input type="file" id="imgFilePicker" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
+
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <span style="font-size:.72rem;color:var(--text-muted);white-space:nowrap">or paste URL</span>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+        <input type="url" id="pImage" class="form-control" placeholder="https://example.com/image.jpg" style="margin-top:10px">
+      </div>
+
+      <!-- Name & Category -->
+      <div class="form-row" style="gap:12px">
+        <div class="form-group" style="margin:0;flex:1">
+          <label>Product Name <span style="color:var(--danger)">*</span></label>
           <input type="text" id="pName" class="form-control" placeholder="e.g. Caramel Macchiato" maxlength="100">
         </div>
-        <div class="form-group">
-          <label>Category <span style="color:red">*</span></label>
+        <div class="form-group" style="margin:0;flex:1">
+          <label>Category <span style="color:var(--danger)">*</span></label>
           <select id="pCat" class="form-control">
             <option value="">Select category</option>
             <option>Appetizer</option><option>Main Course</option>
@@ -100,40 +135,41 @@
           </select>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Price (₱) <span style="color:red">*</span></label>
+
+      <!-- Price & Stock -->
+      <div class="form-row" style="gap:12px">
+        <div class="form-group" style="margin:0;flex:1">
+          <label>Price (₱) <span style="color:var(--danger)">*</span></label>
           <input type="number" id="pPrice" class="form-control" min="0" step="0.01" placeholder="0.00">
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin:0;flex:1">
           <label>Stock Quantity</label>
           <input type="number" id="pQty" class="form-control" min="0" value="0">
         </div>
       </div>
-      <div class="form-group">
-        <label>Image URL (optional)</label>
-        <input type="url" id="pImage" class="form-control" placeholder="https://… or leave blank">
-        <div class="img-preview" id="imgPreview">
-          <span style="font-size:3rem;opacity:.4">☕</span>
+
+      <!-- Available toggle -->
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;
+        background:var(--cream);border-radius:8px;padding:12px 14px;border:1px solid var(--border)">
+        <input type="checkbox" id="pAvail" checked style="width:16px;height:16px;accent-color:var(--brown-dark)">
+        <div>
+          <div style="font-weight:600;font-size:.875rem;color:var(--brown-dark)">Available on menu</div>
+          <div style="font-size:.75rem;color:var(--text-muted)">Customers can see and order this item</div>
         </div>
-      </div>
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="pAvail" checked style="width:16px;height:16px">
-          Available on menu
-        </label>
-      </div>
+      </label>
     </div>
+
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
       <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">
-        <i class="fa-solid fa-floppy-disk"></i> Save
+        <i class="fa-solid fa-floppy-disk"></i> Save Product
       </button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
+<script src="../js/confirm.js"></script>
 <script src="../js/admin-products.js"></script>
 </body>
 </html>

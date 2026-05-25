@@ -25,6 +25,13 @@ async function loadOrders() {
   const dateFrom = document.getElementById('filterFrom').value;
   const dateTo   = document.getElementById('filterTo').value;
 
+  if (dateFrom && dateTo && dateFrom > dateTo) {
+    showToast('"From" date cannot be after "To" date', 'error'); return;
+  }
+  if (dateFrom && dateFrom > new Date().toISOString().slice(0, 10)) {
+    showToast('"From" date cannot be in the future', 'error'); return;
+  }
+
   let url = `${ADMIN_API}/orders.php?action=list`;
   if (status)   url += `&status=${encodeURIComponent(status)}`;
   if (dateFrom) url += `&date_from=${dateFrom}`;
@@ -125,11 +132,19 @@ async function viewDetail(orderID) {
   }
 }
 
-async function updateFromDetail(orderID) {
+function updateFromDetail(orderID) {
   const status = document.getElementById('statusSelect').value;
-  await updateStatus(orderID, status);
-  closeDetail();
-  loadOrders();
+  showConfirm({
+    title: 'Update Order Status',
+    message: `Update Order #${orderID} to "${status}"?`,
+    confirmLabel: 'Update',
+    type: 'save',
+    onConfirm: async () => {
+      await updateStatus(orderID, status);
+      closeDetail();
+      loadOrders();
+    },
+  });
 }
 
 function closeDetail() {
@@ -143,9 +158,17 @@ function clearFilters() {
   loadOrders();
 }
 
-async function logout() {
-  await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
-  window.location.href = 'login.html';
+function logout() {
+  showConfirm({
+    title: 'Log Out',
+    message: 'Are you sure you want to log out?',
+    confirmLabel: 'Log Out',
+    type: 'logout',
+    onConfirm: async () => {
+      await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
+      window.location.href = 'login.html';
+    },
+  });
 }
 
 document.getElementById('sidebarToggle')?.addEventListener('click', () => {

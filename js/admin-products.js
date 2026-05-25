@@ -9,7 +9,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth('admin');
   loadProducts();
 
-  document.getElementById('pImage').addEventListener('input', previewImage);
+  // URL input → preview
+  document.getElementById('pImage').addEventListener('input', () => {
+    setImagePreview(document.getElementById('pImage').value.trim());
+  });
+
+  // Click drop zone → open file picker
+  document.getElementById('imgDropZone').addEventListener('click', () => {
+    document.getElementById('imgFilePicker').click();
+  });
+
+  // File selected
+  document.getElementById('imgFilePicker').addEventListener('change', e => {
+    if (e.target.files[0]) uploadImageFile(e.target.files[0]);
+  });
+
+  // Drag & drop
+  const zone = document.getElementById('imgDropZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--brown-dark)'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = 'var(--border)'; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.style.borderColor = 'var(--border)';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) uploadImageFile(file);
+    else showToast('Please drop an image file', 'error');
+  });
+
   document.getElementById('sidebarToggle')?.addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('show');
@@ -64,8 +90,12 @@ function renderProducts(products) {
   const catIcons = { 'Appetizer':'🍟','Main Course':'🍽️','Drinks':'☕','Dessert':'🍰','Specialty':'⭐' };
 
   tbody.innerHTML = products.map(p => {
-    const imgHtml = p.image
-      ? `<img src="${esc(p.image)}" style="width:48px;height:48px;object-fit:cover;border-radius:6px">`
+    const imgSrc  = p.image
+      ? ((p.image.startsWith('http') || p.image.startsWith('/') || p.image.startsWith('../'))
+          ? p.image : '../' + p.image)
+      : null;
+    const imgHtml = imgSrc
+      ? `<img src="${esc(imgSrc)}" style="width:48px;height:48px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
       : `<span style="font-size:1.8rem">${catIcons[p.category]||'☕'}</span>`;
 
     const stockClass = p.quantity <= 0 ? 'color:var(--danger)' : p.quantity <= 10 ? 'color:var(--warning)' : 'color:var(--success)';
@@ -95,13 +125,14 @@ function renderProducts(products) {
 
 function openAddModal() {
   document.getElementById('modalTitle').textContent = 'Add Product';
-  document.getElementById('editID').value  = '';
-  document.getElementById('pName').value   = '';
-  document.getElementById('pCat').value    = '';
-  document.getElementById('pPrice').value  = '';
-  document.getElementById('pQty').value    = '0';
-  document.getElementById('pImage').value  = '';
+  document.getElementById('editID').value   = '';
+  document.getElementById('pName').value    = '';
+  document.getElementById('pCat').value     = '';
+  document.getElementById('pPrice').value   = '';
+  document.getElementById('pQty').value     = '0';
+  document.getElementById('pImage').value   = '';
   document.getElementById('pAvail').checked = true;
+  document.getElementById('imgFilePicker').value = '';
   resetImgPreview();
   document.getElementById('productModal').classList.add('active');
 }
@@ -110,14 +141,15 @@ async function openEditModal(id) {
   try {
     const p = await fetch(`${ADMIN_API}/products.php?action=get&id=${id}`).then(r => r.json());
     document.getElementById('modalTitle').textContent = 'Edit Product';
-    document.getElementById('editID').value  = p.productID;
-    document.getElementById('pName').value   = p.name;
-    document.getElementById('pCat').value    = p.category;
-    document.getElementById('pPrice').value  = p.price;
-    document.getElementById('pQty').value    = p.quantity;
-    document.getElementById('pImage').value  = p.image || '';
+    document.getElementById('editID').value   = p.productID;
+    document.getElementById('pName').value    = p.name;
+    document.getElementById('pCat').value     = p.category;
+    document.getElementById('pPrice').value   = p.price;
+    document.getElementById('pQty').value     = p.quantity;
+    document.getElementById('pImage').value   = p.image || '';
     document.getElementById('pAvail').checked = p.is_available == 1;
-    previewImage();
+    document.getElementById('imgFilePicker').value = '';
+    setImagePreview(p.image || '');
     document.getElementById('productModal').classList.add('active');
   } catch { showToast('Failed to load product', 'error'); }
 }
@@ -135,64 +167,161 @@ async function saveProduct() {
   const image = document.getElementById('pImage').value.trim();
   const avail = document.getElementById('pAvail').checked ? 1 : 0;
 
-  if (!name || !cat || isNaN(price) || price < 0) {
-    showToast('Please fill all required fields correctly', 'error');
-    return;
+  if (!name) {
+    showToast('Product name is required', 'error'); return;
+  }
+  if (name.length > 100) {
+    showToast('Product name is too long (max 100 characters)', 'error'); return;
+  }
+  if (!cat) {
+    showToast('Please select a category', 'error'); return;
+  }
+  if (isNaN(price) || price <= 0) {
+    showToast('Price must be greater than ₱0', 'error'); return;
+  }
+  if (price > 99999) {
+    showToast('Price is too high (max ₱99,999)', 'error'); return;
+  }
+  if (isNaN(qty) || qty < 0) {
+    showToast('Quantity cannot be negative', 'error'); return;
+  }
+  if (!Number.isInteger(qty)) {
+    showToast('Quantity must be a whole number', 'error'); return;
+  }
+  if (qty > 9999) {
+    showToast('Quantity is too high (max 9,999)', 'error'); return;
   }
 
   const payload = { name, category: cat, price, quantity: qty, image, is_available: avail };
   if (id) payload.productID = parseInt(id);
 
   const action = id ? 'update' : 'add';
-  const btn = document.getElementById('saveProductBtn');
-  btn.disabled = true;
 
-  try {
-    const res  = await fetch(`${ADMIN_API}/products.php?action=${action}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+  const doSave = async () => {
+    const btn = document.getElementById('saveProductBtn');
+    btn.disabled = true;
+    try {
+      const res  = await fetch(`${ADMIN_API}/products.php?action=${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(id ? 'Product updated!' : 'Product added!', 'success');
+        closeProductModal();
+        loadProducts();
+      } else {
+        showToast(data.error || 'Save failed', 'error');
+      }
+    } catch { showToast('Network error', 'error'); }
+    finally { btn.disabled = false; }
+  };
+
+  if (id) {
+    showConfirm({
+      title: 'Save Changes',
+      message: `Update "${name}"? Your changes will be saved.`,
+      confirmLabel: 'Save',
+      type: 'save',
+      onConfirm: doSave,
     });
-    const data = await res.json();
-    if (data.success) {
-      showToast(id ? 'Product updated!' : 'Product added!', 'success');
-      closeProductModal();
-      loadProducts();
-    } else {
-      showToast(data.error || 'Save failed', 'error');
-    }
-  } catch { showToast('Network error', 'error'); }
-  finally { btn.disabled = false; }
+  } else {
+    doSave();
+  }
 }
 
 async function deleteProduct(id, name) {
-  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-  try {
-    const res  = await fetch(`${ADMIN_API}/products.php?action=delete&id=${id}`);
-    const data = await res.json();
-    if (data.success) { showToast('Product deleted', 'success'); loadProducts(); }
-    else showToast(data.error || 'Delete failed', 'error');
-  } catch { showToast('Network error', 'error'); }
+  showConfirm({
+    title: 'Delete Product',
+    message: `Delete "${name}"? This cannot be undone.`,
+    confirmLabel: 'Delete',
+    type: 'danger',
+    onConfirm: async () => {
+      try {
+        const res  = await fetch(`${ADMIN_API}/products.php?action=delete&id=${id}`);
+        const data = await res.json();
+        if (data.success) { showToast('Product deleted', 'success'); loadProducts(); }
+        else showToast(data.error || 'Delete failed', 'error');
+      } catch { showToast('Network error', 'error'); }
+    },
+  });
 }
 
-function previewImage() {
-  const url = document.getElementById('pImage').value.trim();
-  const el  = document.getElementById('imgPreview');
-  if (url) {
-    el.innerHTML = `<img src="${esc(url)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px"
-      onerror="this.parentElement.innerHTML='<span style=\\'opacity:.4;font-size:3rem\\'>❌</span>'">`;
+async function uploadImageFile(file) {
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowed.includes(file.type)) { showToast('Invalid file type', 'error'); return; }
+  if (file.size > 5 * 1024 * 1024)  { showToast('File too large (max 5 MB)', 'error'); return; }
+
+  // Show uploading state
+  document.getElementById('imgUploadingBadge').style.display = 'flex';
+  document.getElementById('imgRemoveBtn').style.display = 'none';
+
+  const form = new FormData();
+  form.append('image', file);
+
+  try {
+    const res  = await fetch(`${ADMIN_API}/products.php?action=upload_image`, { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('pImage').value = data.path;
+      setImagePreview(data.path);
+      showToast('Image uploaded!', 'success');
+    } else {
+      showToast(data.error || 'Upload failed', 'error');
+    }
+  } catch { showToast('Upload failed – network error', 'error'); }
+  finally  { document.getElementById('imgUploadingBadge').style.display = 'none'; }
+}
+
+function setImagePreview(src) {
+  const preview     = document.getElementById('imgPreviewEl');
+  const placeholder = document.getElementById('imgPlaceholder');
+  const removeBtn   = document.getElementById('imgRemoveBtn');
+
+  if (src) {
+    // Relative paths (uploads) need ../ prefix since we're inside /admin/
+    const displaySrc = (src.startsWith('http') || src.startsWith('/') || src.startsWith('../'))
+      ? src
+      : '../' + src;
+
+    preview.src               = displaySrc;
+    preview.style.display     = 'block';
+    placeholder.style.display = 'none';
+    removeBtn.style.display   = 'flex';
+    preview.onerror = () => {
+      resetImgPreview();
+      showToast('Could not load image from URL', 'error');
+    };
   } else {
     resetImgPreview();
   }
 }
 
 function resetImgPreview() {
-  document.getElementById('imgPreview').innerHTML = '<span style="font-size:3rem;opacity:.4">☕</span>';
+  document.getElementById('imgPreviewEl').style.display   = 'none';
+  document.getElementById('imgPlaceholder').style.display = 'block';
+  document.getElementById('imgRemoveBtn').style.display   = 'none';
 }
 
-async function logout() {
-  await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
-  window.location.href = 'login.html';
+function removeImage(e) {
+  e.stopPropagation();
+  document.getElementById('pImage').value = '';
+  document.getElementById('imgFilePicker').value = '';
+  resetImgPreview();
+}
+
+function logout() {
+  showConfirm({
+    title: 'Log Out',
+    message: 'Are you sure you want to log out?',
+    confirmLabel: 'Log Out',
+    type: 'logout',
+    onConfirm: async () => {
+      await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
+      window.location.href = 'login.html';
+    },
+  });
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

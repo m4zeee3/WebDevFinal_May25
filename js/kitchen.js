@@ -29,6 +29,11 @@ function startClock() {
 async function loadOrders() {
   try {
     const orders = await fetch(`${API}/orders.php?action=kitchen`).then(r => r.json());
+    if (!Array.isArray(orders)) {
+      document.getElementById('statusLabel').textContent = 'Connection error';
+      document.getElementById('pulseIndicator').style.background = '#dc3545';
+      return;
+    }
     renderOrders(orders);
     setLiveStatus(orders.length);
   } catch {
@@ -116,13 +121,31 @@ function buildOrderCard(o) {
 
 // ----- Update Order Status -----
 async function setOrderStatus(orderID, status) {
+  const validStatuses = ['pending', 'preparing', 'ready', 'completed', 'cancelled'];
+  if (!validStatuses.includes(status)) { console.error('Invalid status:', status); return; }
+
+  if (status === 'cancelled') {
+    showConfirm({
+      title: 'Cancel Order',
+      message: `Cancel Order #${orderID}? This cannot be undone.`,
+      confirmLabel: 'Cancel Order',
+      type: 'danger',
+      onConfirm: () => doSetOrderStatus(orderID, status),
+    });
+    return;
+  }
+
+  doSetOrderStatus(orderID, status);
+}
+
+async function doSetOrderStatus(orderID, status) {
   try {
     await fetch(`${API}/orders.php?action=update_status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderID, status }),
     });
-    loadOrders(); // immediate re-render
+    loadOrders();
   } catch { console.error('Status update failed'); }
 }
 

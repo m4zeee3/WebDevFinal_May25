@@ -119,23 +119,47 @@ function renderInventory(products) {
 async function updateStock(productID) {
   const input = document.getElementById(`stock_${productID}`);
   const qty   = parseInt(input.value);
-  if (isNaN(qty) || qty < 0) { showToast('Invalid quantity', 'error'); return; }
+  if (isNaN(qty) || qty < 0) {
+    showToast('Quantity cannot be negative', 'error'); return;
+  }
+  if (!Number.isInteger(qty)) {
+    showToast('Quantity must be a whole number', 'error'); return;
+  }
+  if (qty > 9999) {
+    showToast('Quantity is too high (max 9,999)', 'error'); return;
+  }
 
-  try {
-    const res  = await fetch(`${ADMIN_API}/inventory.php?action=update_stock`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productID, quantity: qty }),
-    });
-    const data = await res.json();
-    if (data.success) { showToast('Stock updated!', 'success'); loadInventory(); }
-    else showToast('Update failed', 'error');
-  } catch { showToast('Network error', 'error'); }
+  showConfirm({
+    title: 'Update Stock',
+    message: `Set stock quantity to ${qty}?`,
+    confirmLabel: 'Update',
+    type: 'save',
+    onConfirm: async () => {
+      try {
+        const res  = await fetch(`${ADMIN_API}/inventory.php?action=update_stock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productID, quantity: qty }),
+        });
+        const data = await res.json();
+        if (data.success) { showToast('Stock updated!', 'success'); loadInventory(); }
+        else showToast('Update failed', 'error');
+      } catch { showToast('Network error', 'error'); }
+    },
+  });
 }
 
-async function logout() {
-  await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
-  window.location.href = 'login.html';
+function logout() {
+  showConfirm({
+    title: 'Log Out',
+    message: 'Are you sure you want to log out?',
+    confirmLabel: 'Log Out',
+    type: 'logout',
+    onConfirm: async () => {
+      await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
+      window.location.href = 'login.html';
+    },
+  });
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

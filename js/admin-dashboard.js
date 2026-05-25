@@ -166,9 +166,17 @@ function renderStatusChart(statusCounts) {
 }
 
 // ----- Logout -----
-async function logout() {
-  await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
-  window.location.href = 'login.html';
+function logout() {
+  showConfirm({
+    title: 'Log Out',
+    message: 'Are you sure you want to log out?',
+    confirmLabel: 'Log Out',
+    type: 'logout',
+    onConfirm: async () => {
+      await fetch(`${ADMIN_API}/auth.php?action=logout`, { method: 'POST' });
+      window.location.href = 'login.html';
+    },
+  });
 }
 
 // ----- Helpers -----

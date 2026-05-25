@@ -1,0 +1,12 @@
+{
+  "name": "roots-coffee-craft",
+  "version": "1.0.0",
+  "description": "Roots Coffee & Craft ordering system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.9.0"
+  }
+}

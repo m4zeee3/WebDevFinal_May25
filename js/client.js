@@ -6,9 +6,19 @@ const API = '../api';
 let allProducts = [];
 let cart = [];
 let currentCategory = 'All';
+let tableNumber = null;
 
 // ----- Boot -----
 document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const t = parseInt(params.get('table'));
+  if (t && t > 0) {
+    tableNumber = t;
+    document.getElementById('tableBadge').style.display = 'inline-block';
+    document.getElementById('tableLabel').textContent    = `Table ${t}`;
+    document.getElementById('tableInfoRow').style.display = 'block';
+    document.getElementById('tableDisplay').value         = `Table ${t}`;
+  }
   loadProducts();
   bindEvents();
 });
@@ -88,6 +98,10 @@ function addToCart(productID) {
 
   const existing = cart.find(c => c.productID === productID);
   if (existing) {
+    if (existing.quantity >= parseInt(product.quantity)) {
+      showToast(`Only ${product.quantity} of "${product.name}" available`, 'error');
+      return;
+    }
     existing.quantity++;
   } else {
     cart.push({ productID, name: product.name, price: parseFloat(product.price), quantity: 1 });
@@ -98,10 +112,41 @@ function addToCart(productID) {
 }
 
 function updateCartQty(productID, delta) {
-  const item = cart.find(c => c.productID === productID);
+  const item    = cart.find(c => c.productID === productID);
+  const product = allProducts.find(p => parseInt(p.productID) === productID);
   if (!item) return;
-  item.quantity += delta;
-  if (item.quantity <= 0) cart = cart.filter(c => c.productID !== productID);
+
+  const newQty = item.quantity + delta;
+  if (newQty <= 0) {
+    cart = cart.filter(c => c.productID !== productID);
+    updateCartUI();
+    return;
+  }
+  if (product && newQty > parseInt(product.quantity)) {
+    showToast(`Only ${product.quantity} of "${product.name}" available`, 'error');
+    return;
+  }
+  item.quantity = newQty;
+  updateCartUI();
+}
+
+function setCartQty(productID, rawValue) {
+  const qty     = parseInt(rawValue);
+  const item    = cart.find(c => c.productID === productID);
+  const product = allProducts.find(p => parseInt(p.productID) === productID);
+  if (!item || !product) return;
+
+  if (isNaN(qty) || qty < 1) {
+    showToast('Quantity must be at least 1', 'error');
+    updateCartUI();
+    return;
+  }
+  if (qty > parseInt(product.quantity)) {
+    showToast(`Only ${product.quantity} of "${product.name}" available`, 'error');
+    updateCartUI();
+    return;
+  }
+  item.quantity = qty;
   updateCartUI();
 }
 
@@ -135,7 +180,10 @@ function updateCartUI() {
     return;
   }
 
-  itemsEl.innerHTML = cart.map(item => `
+  itemsEl.innerHTML = cart.map(item => {
+    const product = allProducts.find(p => parseInt(p.productID) === item.productID);
+    const stock   = product ? parseInt(product.quantity) : item.quantity;
+    return `
     <div class="cart-item">
       <div style="flex:1">
         <div class="cart-item-name">${esc(item.name)}</div>
@@ -143,14 +191,18 @@ function updateCartUI() {
       </div>
       <div class="qty-controls">
         <button class="qty-btn" onclick="updateCartQty(${item.productID}, -1)">−</button>
-        <span class="qty-val">${item.quantity}</span>
+        <input type="number" class="qty-val" value="${item.quantity}"
+          min="1" max="${stock}"
+          onchange="setCartQty(${item.productID}, this.value)"
+          onclick="this.select()">
         <button class="qty-btn" onclick="updateCartQty(${item.productID}, 1)">+</button>
       </div>
       <div class="cart-item-price">₱${(item.price * item.quantity).toFixed(2)}</div>
       <button class="qty-remove" onclick="removeFromCart(${item.productID})" title="Remove">
         <i class="fa-solid fa-trash"></i>
       </button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ----- Cart Sidebar Open/Close -----
@@ -181,8 +233,23 @@ function openCheckout() {
 // ----- Place Order -----
 async function placeOrder() {
   const nameInput = document.getElementById('customerName');
-  const name = nameInput.value.trim() || 'Customer';
-  const btn  = document.getElementById('placeOrderBtn');
+  const name      = nameInput.value.trim() || 'Customer';
+  const btn       = document.getElementById('placeOrderBtn');
+
+  if (cart.length === 0) {
+    showToast('Your cart is empty', 'error');
+    return;
+  }
+  if (nameInput.value.trim().length > 100) {
+    showToast('Name is too long (max 100 characters)', 'error');
+    nameInput.focus();
+    return;
+  }
+  if (nameInput.value.trim() && !/^[\w\s\-'.]+$/i.test(nameInput.value.trim())) {
+    showToast('Name contains invalid characters', 'error');
+    nameInput.focus();
+    return;
+  }
 
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div>';
@@ -193,6 +260,7 @@ async function placeOrder() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         customer_name: name,
+        table_number:  tableNumber,
         items: cart.map(c => ({ productID: c.productID, quantity: c.quantity })),
       }),
     });

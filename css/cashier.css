@@ -155,7 +155,21 @@ body.cashier-body { background: #f4f1ec; }
   transition: var(--transition);
 }
 .pos-qty-btn:hover { background: var(--brown-dark); color: var(--white); border-color: var(--brown-dark); }
-.pos-qty-val { font-weight: 700; min-width: 20px; text-align: center; font-size: 0.875rem; }
+.pos-qty-val {
+  font-weight: 700;
+  width: 44px;
+  text-align: center;
+  font-size: 0.875rem;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 4px;
+  background: var(--cream-light);
+  color: var(--brown-dark);
+  -moz-appearance: textfield;
+}
+.pos-qty-val::-webkit-outer-spin-button,
+.pos-qty-val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pos-qty-val:focus { outline: none; border-color: var(--brown-dark); background: #fff; }
 
 .pos-cart-empty { text-align: center; padding: 40px 16px; color: var(--text-muted); }
 .pos-cart-empty i { font-size: 2.5rem; display: block; margin-bottom: 10px; opacity: .35; }
